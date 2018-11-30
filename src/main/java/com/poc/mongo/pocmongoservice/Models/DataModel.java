@@ -1,6 +1,5 @@
 package com.poc.mongo.pocmongoservice.Models;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.HashMap;
@@ -62,4 +61,5 @@ public class DataModel {
     public void setPrice(String price) {
         this.price = price;
     }
+
 }

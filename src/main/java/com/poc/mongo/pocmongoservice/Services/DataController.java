@@ -15,13 +15,24 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
 @RestController
-@RequestMapping(value = "/")
+@RequestMapping(value = "/api")
 public class DataController {
 
     private final Logger LOG = LoggerFactory.getLogger(getClass());
 
     @Autowired
     MongoDbRepository repo;
+
+    @RequestMapping(value = "/add", method = RequestMethod.POST)
+    public String addOne(@RequestBody DataModel dat) throws ExecutionException, InterruptedException {
+        LOG.info("Started insert operation");
+        long start = System.currentTimeMillis();
+        CompletableFuture<String> add = repo.insert(dat);
+        String res = add.get();
+        LOG.info("Elapsed time: " + (System.currentTimeMillis() - start));
+        LOG.info("Insert record "+res);
+        return res;
+    }
 
     @RequestMapping(value = "/create", method = RequestMethod.POST)
     public int addData(@RequestBody List<DataModel> dat) throws ExecutionException, InterruptedException {

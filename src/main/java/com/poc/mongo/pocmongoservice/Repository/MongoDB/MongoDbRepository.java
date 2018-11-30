@@ -3,15 +3,20 @@ package com.poc.mongo.pocmongoservice.Repository.MongoDB;
 import com.mongodb.BulkWriteException;
 import com.mongodb.MongoClient;
 import com.mongodb.BulkWriteError;
+import com.mongodb.MongoClientSettings;
 import com.mongodb.bulk.BulkWriteResult;
+import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.MongoIterable;
 import com.mongodb.client.model.BulkWriteOptions;
+import com.mongodb.client.model.InsertOneModel;
 import com.mongodb.client.model.UpdateOneModel;
 import com.mongodb.client.model.UpdateOptions;
 import com.poc.mongo.pocmongoservice.Models.DataModel;
 import org.bson.Document;
+import org.bson.codecs.configuration.CodecRegistry;
+import org.bson.codecs.pojo.PojoCodecProvider;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.scheduling.annotation.Async;
@@ -22,13 +27,16 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
+import static org.bson.codecs.configuration.CodecRegistries.fromProviders;
+import static org.bson.codecs.configuration.CodecRegistries.fromRegistries;
+
 @Component
 @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
 public class MongoDbRepository {
 
     private MongoClient Client;
     private MongoDatabase Database;
-    private MongoCollection<Document> Collection;
+    private MongoCollection<DataModel> Collection;
 
     public boolean collectionExists(final String collectionName) {
         MongoIterable<String> collectionNames = this.Database.listCollectionNames();
@@ -42,9 +50,12 @@ public class MongoDbRepository {
 
     public MongoDbRepository() {
 
+        CodecRegistry pojoCodecRegistry = fromRegistries(MongoClient.getDefaultCodecRegistry(),
+                fromProviders(PojoCodecProvider.builder().automatic(true).build()));
+
         this.Client = new MongoClient("localhost");
-        this.Database = this.Client.getDatabase("admin");
-        this.Collection = this.Database.getCollection("data");
+        this.Database = this.Client.getDatabase("admin").withCodecRegistry(pojoCodecRegistry);
+        this.Collection = this.Database.getCollection("data", DataModel.class);
         if(!collectionExists("data"))
         {
             this.Database.createCollection("data");
@@ -52,9 +63,15 @@ public class MongoDbRepository {
     }
 
     @Async
+    public CompletableFuture<String> insert(DataModel dat) {
+       Collection.insertOne(dat);
+       return CompletableFuture.completedFuture("Done");
+    }
+
+    @Async
     public CompletableFuture<Integer> bulkUpsert(List<DataModel> data) {
 
-        List<UpdateOneModel<Document>> updateDocuments = new ArrayList<>();
+       /* List<UpdateOneModel<Document>> updateDocuments = new ArrayList<>();
         for (DataModel dat : data) {
 
             //Finder doc
@@ -90,7 +107,7 @@ public class MongoDbRepository {
 
         try {
             //Perform bulk update
-            bulkWriteResult = Collection.bulkWrite(updateDocuments, bulkWriteOptions);
+            bulkWriteResult = Collection.b
         } catch (BulkWriteException e) {
             //Handle bulkwrite exception
             List<BulkWriteError> bulkWriteErrors = e.getWriteErrors();
@@ -102,9 +119,9 @@ public class MongoDbRepository {
             }
         }
 
-        int modified = bulkWriteResult.getModifiedCount();
+        int modified = bulkWriteResult.getModifiedCount();*/
 
-        return CompletableFuture.completedFuture(modified);
+        return CompletableFuture.completedFuture(1);
 
     }
 }
