@@ -31,6 +31,10 @@ public class MongoDbRepository {
         this.Client = new MongoClient("localhost");
         this.Database = this.Client.getDatabase("admin");
         this.Collection = this.Database.getCollection("data");
+        if(this.Collection.count() == 0)
+        {
+            this.Database.createCollection("data");
+        }
     }
 
     public int bulkUpsert(List<DataModel> data) {
