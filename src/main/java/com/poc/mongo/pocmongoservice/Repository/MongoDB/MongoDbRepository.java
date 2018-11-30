@@ -6,6 +6,7 @@ import com.mongodb.BulkWriteError;
 import com.mongodb.bulk.BulkWriteResult;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.MongoIterable;
 import com.mongodb.client.model.BulkWriteOptions;
 import com.mongodb.client.model.UpdateOneModel;
 import com.mongodb.client.model.UpdateOptions;
@@ -13,10 +14,13 @@ import com.poc.mongo.pocmongoservice.Models.DataModel;
 import org.bson.Document;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 
 @Component
 @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
@@ -26,18 +30,29 @@ public class MongoDbRepository {
     private MongoDatabase Database;
     private MongoCollection<Document> Collection;
 
+    public boolean collectionExists(final String collectionName) {
+        MongoIterable<String> collectionNames = this.Database.listCollectionNames();
+        for (final String name : collectionNames) {
+            if (name.equalsIgnoreCase(collectionName)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public MongoDbRepository() {
 
         this.Client = new MongoClient("localhost");
         this.Database = this.Client.getDatabase("admin");
         this.Collection = this.Database.getCollection("data");
-        if(this.Collection.count() == 0)
+        if(!collectionExists("data"))
         {
             this.Database.createCollection("data");
         }
     }
 
-    public int bulkUpsert(List<DataModel> data) {
+    @Async
+    public CompletableFuture<Integer> bulkUpsert(List<DataModel> data) {
 
         List<UpdateOneModel<Document>> updateDocuments = new ArrayList<>();
         for (DataModel dat : data) {
@@ -87,7 +102,9 @@ public class MongoDbRepository {
             }
         }
 
-        return bulkWriteResult.getModifiedCount();
+        int modified = bulkWriteResult.getModifiedCount();
+
+        return CompletableFuture.completedFuture(modified);
 
     }
 }

@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 @RestController
 @RequestMapping(value = "/")
@@ -22,9 +24,14 @@ public class DataController {
     MongoDbRepository repo;
 
     @RequestMapping(value = "/create", method = RequestMethod.POST)
-    public int addData(@RequestBody List<DataModel> dat) {
+    public int addData(@RequestBody List<DataModel> dat) throws ExecutionException, InterruptedException {
         LOG.info("Started upsert operation");
-        return repo.bulkUpsert(dat);
+        long start = System.currentTimeMillis();
+        CompletableFuture<Integer> doUpsert = repo.bulkUpsert(dat);
+        int mod = doUpsert.get();
+        LOG.info("Elapsed time: " + (System.currentTimeMillis() - start));
+        LOG.info("Modified records"+mod);
+        return mod;
     }
 
 }
