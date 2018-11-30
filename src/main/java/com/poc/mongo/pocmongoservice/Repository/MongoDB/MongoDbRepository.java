@@ -66,8 +66,8 @@ public class MongoDbRepository {
        return CompletableFuture.completedFuture("Done");
     }
 
-    @Async
-    public CompletableFuture<Integer> bulkUpsert(List<DataModel> data) {
+    @Async("threadPoolTaskExecutor")
+    public void bulkUpsert(List<DataModel> data) {
 
        List<WriteModel<DataModel>> updateDocuments = new ArrayList<>();
         for (DataModel dat : data) {
@@ -102,7 +102,7 @@ public class MongoDbRepository {
         //Bulk write options
         BulkWriteOptions bulkWriteOptions = new BulkWriteOptions();
         bulkWriteOptions.ordered(false);
-        bulkWriteOptions.bypassDocumentValidation(true);
+        bulkWriteOptions.bypassDocumentValidation(false);
         BulkWriteResult bulkWriteResult = null;
 
         try {
@@ -119,9 +119,9 @@ public class MongoDbRepository {
             }
         }
 
-        int modified = bulkWriteResult.getModifiedCount();
+       // int modified = bulkWriteResult.getModifiedCount();
 
-        return CompletableFuture.completedFuture(modified);
+       // return CompletableFuture.completedFuture(modified);
 
     }
 }

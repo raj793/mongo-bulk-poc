@@ -16,11 +16,11 @@ public class PocMongoServiceApplication {
 		SpringApplication.run(PocMongoServiceApplication.class, args);
 	}
 
-	@Bean
+	@Bean(name = "threadPoolTaskExecutor")
 	public Executor taskExecutor() {
 		ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-		executor.setCorePoolSize(2);
-		executor.setMaxPoolSize(2);
+		executor.setCorePoolSize(20);
+		executor.setMaxPoolSize(30);
 		executor.setQueueCapacity(500);
 		executor.setThreadNamePrefix("BulkUpsert-");
 		executor.initialize();

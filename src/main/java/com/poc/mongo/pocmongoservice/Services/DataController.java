@@ -35,14 +35,12 @@ public class DataController {
     }
 
     @RequestMapping(value = "/create", method = RequestMethod.POST)
-    public int addData(@RequestBody List<DataModel> dat) throws ExecutionException, InterruptedException {
+    public String addData(@RequestBody List<DataModel> dat) throws ExecutionException, InterruptedException {
         LOG.info("Started upsert operation");
         long start = System.currentTimeMillis();
-        CompletableFuture<Integer> doUpsert = repo.bulkUpsert(dat);
-        int mod = doUpsert.get();
-        LOG.info("Elapsed time: " + ((double)(System.currentTimeMillis() - start)/1000));
-        LOG.info("Modified records"+mod);
-        return mod;
+        repo.bulkUpsert(dat);
+        Double time = ((double)(System.currentTimeMillis() - start)/1000);
+        return time.toString();
     }
 
 }
