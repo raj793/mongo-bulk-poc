@@ -1,14 +1,16 @@
 package com.poc.mongo.pocmongoservice.Models;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.bson.types.ObjectId;
+import org.springframework.data.annotation.Id;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class DataModel {
 
-    @JsonProperty("_id")
-    private String id;
+    @Id
+    private ObjectId id;
     @JsonProperty("site")
     private String site;
     @JsonProperty("product")
@@ -18,10 +20,13 @@ public class DataModel {
     @JsonProperty("price")
     private String price;
 
+    public ObjectId getId() {
+        return id;
+    }
 
-    public String getId() { return id; }
-
-    public void setId(String id) { this.id = id; }
+    public void setId(ObjectId id) {
+        this.id = id;
+    }
 
     public String getSite() {
         return site;

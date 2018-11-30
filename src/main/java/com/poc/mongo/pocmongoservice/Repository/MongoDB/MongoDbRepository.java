@@ -9,14 +9,12 @@ import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.MongoIterable;
-import com.mongodb.client.model.BulkWriteOptions;
-import com.mongodb.client.model.InsertOneModel;
-import com.mongodb.client.model.UpdateOneModel;
-import com.mongodb.client.model.UpdateOptions;
+import com.mongodb.client.model.*;
 import com.poc.mongo.pocmongoservice.Models.DataModel;
 import org.bson.Document;
 import org.bson.codecs.configuration.CodecRegistry;
 import org.bson.codecs.pojo.PojoCodecProvider;
+import org.bson.types.ObjectId;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.scheduling.annotation.Async;
@@ -71,24 +69,26 @@ public class MongoDbRepository {
     @Async
     public CompletableFuture<Integer> bulkUpsert(List<DataModel> data) {
 
-       /* List<UpdateOneModel<Document>> updateDocuments = new ArrayList<>();
+       List<WriteModel<DataModel>> updateDocuments = new ArrayList<>();
         for (DataModel dat : data) {
 
             //Finder doc
             Document filterDocument = new Document();
-            filterDocument.append("_id", dat.getId());
+            filterDocument.append("site", dat.getSite());
+            filterDocument.append("product", dat.getProduct());
 
             //Update doc
             Document updateDocument = new Document();
             Document setDocument = new Document();
-            setDocument.append(dat.getId(), dat);
+            setDocument.append("price", dat.getPrice());
+            setDocument.append("qty", dat.getQty());
 
             updateDocument.append("$set", setDocument);
 
             //Update option
             UpdateOptions updateOptions = new UpdateOptions();
             updateOptions.upsert(true); //if true, will create a new doc in case of unmatched find
-            updateOptions.bypassDocumentValidation(true); //set true/false
+            updateOptions.bypassDocumentValidation(false); //set true/false
 
             //Prepare list of Updates
             updateDocuments.add(
@@ -107,21 +107,21 @@ public class MongoDbRepository {
 
         try {
             //Perform bulk update
-            bulkWriteResult = Collection.b
+            bulkWriteResult = Collection.bulkWrite(updateDocuments);
         } catch (BulkWriteException e) {
             //Handle bulkwrite exception
             List<BulkWriteError> bulkWriteErrors = e.getWriteErrors();
             for (BulkWriteError bulkWriteError : bulkWriteErrors) {
                 int failedIndex = bulkWriteError.getIndex();
-                String failedEntityId = data.get(failedIndex).getId();
+                ObjectId failedEntityId = data.get(failedIndex).getId();
                 System.out.println("Failed record: " + failedEntityId);
                 //handle rollback
             }
         }
 
-        int modified = bulkWriteResult.getModifiedCount();*/
+        int modified = bulkWriteResult.getModifiedCount();
 
-        return CompletableFuture.completedFuture(1);
+        return CompletableFuture.completedFuture(modified);
 
     }
 }

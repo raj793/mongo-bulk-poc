@@ -40,7 +40,7 @@ public class DataController {
         long start = System.currentTimeMillis();
         CompletableFuture<Integer> doUpsert = repo.bulkUpsert(dat);
         int mod = doUpsert.get();
-        LOG.info("Elapsed time: " + (System.currentTimeMillis() - start));
+        LOG.info("Elapsed time: " + ((double)(System.currentTimeMillis() - start)/1000));
         LOG.info("Modified records"+mod);
         return mod;
     }
