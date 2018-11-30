@@ -22,9 +22,9 @@ public class DataController {
     MongoDbRepository repo;
 
     @RequestMapping(value = "/create", method = RequestMethod.POST)
-    public void addData(@RequestBody List<DataModel> dat) {
+    public int addData(@RequestBody List<DataModel> dat) {
         LOG.info("Started upsert operation");
-        repo.bulkUpsert(dat);
+        return repo.bulkUpsert(dat);
     }
 
 }

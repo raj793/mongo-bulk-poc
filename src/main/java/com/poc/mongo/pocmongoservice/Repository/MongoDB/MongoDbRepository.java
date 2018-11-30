@@ -33,7 +33,7 @@ public class MongoDbRepository {
         this.Collection = this.Database.getCollection("data");
     }
 
-    public void bulkUpsert(List<DataModel> data) {
+    public int bulkUpsert(List<DataModel> data) {
 
         List<UpdateOneModel<Document>> updateDocuments = new ArrayList<>();
         for (DataModel dat : data) {
@@ -83,8 +83,7 @@ public class MongoDbRepository {
             }
         }
 
-        System.out.println(bulkWriteResult.getModifiedCount());
-
+        return bulkWriteResult.getModifiedCount();
 
     }
 }
